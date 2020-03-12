@@ -8,7 +8,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      title: "",
+      inputValue: "",
       data: [],
       onclick: false
     };
@@ -17,29 +17,39 @@ class App extends Component {
     this.props.getTodoRequest();
   }
   handleSubmit = e => {
+    this.setState({ inputValue: "" });
     this.props.addTodoRequest();
-    console.log(this.state.title);
     let id = this.props.getTodo.data.length;
     let newData = [
       ...this.props.getTodo.data,
       ...[
         {
           id: id,
-          name: this.state.title,
+          name: this.state.inputValue,
           checked: false
         }
       ]
     ];
     this.props.addTodoRequest(newData);
     e.preventDefault();
-    if (this.state.title === "") {
+    if (this.state.inputValue === "") {
       this.setState({ onclick: false });
     } else {
       this.setState({ onclick: true });
     }
   };
   handleChange = e => {
-    this.setState({ title: e.target.value });
+    this.setState({ inputValue: e.target.value });
+  };
+  handleEventChange = event => {
+    let checkValue = event.target.name;
+    let data = this.props.getTodo.data.map(val => {
+      if (val.name === checkValue) {
+        val.checked = !val.checked;
+      }
+      return val;
+    });
+    this.setState({ data: data });
   };
   render() {
     if (!this.props.getTodo.data) return null;
@@ -56,9 +66,12 @@ class App extends Component {
                   id={val.id}
                   value={val.checked}
                   name={val.name}
+                  onChange={this.handleEventChange}
                 />
                 <span>{val.name}</span>
-                <span className=" span badge badge-secondary ">Checked</span>
+                {val.checked ? (
+                  <span className="badge badge-secondary ">Checked</span>
+                ) : null}
               </li>
             );
           })}
@@ -67,7 +80,7 @@ class App extends Component {
           type="text"
           className={this.state.onclick ? "form_button" : "form_button1"}
           placeholder="Todo..."
-          value={this.state.title}
+          value={this.state.inputValue}
           onChange={this.handleChange}
         ></input>
         <br />
@@ -80,7 +93,7 @@ class App extends Component {
 }
 
 const getProps = state => {
-  return { getTodo: state.getTodo, addTodo: state.title };
+  return { getTodo: state.getTodo, addTodo: state.inputValue };
 };
 
 const dispatchProps = dispatch => ({
